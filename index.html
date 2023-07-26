@@ -1,0 +1,188 @@
+<html>
+    <script src='https://d3js.org/d3.v5.min.js'></script>
+    <style> body {fill: lightblue} </style>
+    <head>
+    </head>
+    <body onload='init()'>
+        <svg width=1000 height=1000>   
+        </svg>
+        <script>
+            var margin = 50;
+            var chartHeight = 700;
+            var chartWidth = 900;
+            var axisBottomHeight = margin + chartHeight;
+
+            // Function to initialize the chart axes and load the dataset
+            function init() {
+
+                /**
+                 * Data setup for chart
+                 */
+                var xData = [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
+                var allDeaths = [6.1, 6.2, 6.8, 8.2, 8.9, 9.4, 10.1, 11.5, 11.9, 11.9, 11.9, 12.3, 13.2, 13.1, 13.8, 14.7, 16.3, 19.8, 21.7];
+                var opioidDeaths = [2.9, 3, 3.3, 4.1, 4.5, 4.7, 5.1, 5.9, 6.1, 6.4, 6.6, 6.8, 7.3, 7.4, 7.9, 9, 10.4, 13.3, 14.9];
+
+                var firstLineData = xData.map(function (val, idx) {
+                    return [val, allDeaths[idx]];
+                });
+                var secondLineData = xData.map(function (val, idx) {
+                    return [val, opioidDeaths[idx]];
+                });
+
+                var x = d3.scaleBand().domain(xData).range([0, chartWidth]);
+                var y = d3.scaleLinear().domain([1, 25]).range([chartHeight, 0]);
+                
+                /**
+                 * Y-Axis setup
+                 */
+                d3.select('svg')
+                  .append('g')
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .call(d3.axisLeft(y));
+
+                /**
+                 * X-Axis setup
+                 */
+                d3.select('svg')
+                  .append('g')
+                  .attr('transform', 'translate(' + margin + ',' + axisBottomHeight + ')')
+                  .call(d3.axisBottom(x));
+
+                /**
+                 * Title setup
+                 */
+                d3.select('svg')
+                  .append('text')
+                  .attr('x', chartWidth/2 + margin)
+                  .attr('y', margin)
+                  .attr('text-anchor', 'middle')
+                  .style('font-family', 'Roboto')
+                  .style('font-size', 30)
+                  .style('fill', 'black')
+                  .text('Impact of the Opioid Crisis');
+
+                /**
+                 * Legend setup
+                 */
+                var legendLabels = ['Total Overdose Deaths', 'Opioid Overdose Deaths'];
+                var colors = ['#0034F0', '#FC6000'];
+                d3.select('svg')
+                  .append('g')
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .selectAll('circle')
+                  .data(legendLabels)
+                  .enter()
+                  .append('circle')
+                  .attr('cx', 50)
+                  .attr('cy', function (d, idx) { return 50 + idx * 25; })
+                  .attr('r', 6)
+                  .style('fill', function (d, idx) { return colors[idx]; });
+
+                d3.select('svg')
+                  .append('g')
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .selectAll('text')
+                  .data(legendLabels)
+                  .enter()
+                  .append('text')
+                  .attr('x', 70)
+                  .attr('y', function(d, idx) { return 50 + idx * 25; })
+                  .style('fill', function(d) { return 'black'; })
+                  .style('font-family', 'Roboto')
+                  .style('font-size', 15)
+                  .text(function(d) { return d; })
+                  .attr('text-anchor', 'left')
+                  .style('alignment-baseline', 'middle')
+
+
+                /**
+                 * Y-Axis title setup
+                 */
+                d3.select('svg')
+                  .append('text')
+                  .attr('text-anchor', 'middle')
+                  .attr('transform', 'translate(20,' + chartHeight / 2 + ')rotate(-90)')
+                  .style('font-family', 'Roboto')
+                  .style('font-size', 20)
+                  .style('fill', 'black')
+                  .text('Deaths per 100K People');
+
+                /**
+                 * X-Axis title setup
+                 */
+                var xAxisTitleHeight = axisBottomHeight + 35
+                d3.select('svg')
+                  .append('text')
+                  .attr('text-anchor', 'middle')
+                  .attr('x', chartWidth/2 + margin)
+                  .attr('y', xAxisTitleHeight)
+                  .style('font-family', 'Roboto')
+                  .style('font-size', 20)
+                  .style('fill', 'black')
+                  .text('Year');
+
+                /**
+                 * Section for the first line
+                 */
+                d3.select('svg')
+                  .append('g')
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .selectAll('circle')
+                  .data(firstLineData)
+                  .enter()
+                  .append('circle')
+                  .attr('cx', function (d) { return x(d[0])  + x.bandwidth()/2; })
+                  .attr('cy', function (d) { return y(d[1]); })
+                  .attr('r', 3)
+                  .style('fill', '#0034F0');
+
+                var line = d3.line()
+                  .x(function(d) { return x(d[0]) + x.bandwidth()/2; }) 
+                  .y(function(d) { return y(d[1]); }) 
+                  .curve(d3.curveMonotoneX);
+
+                // Draw line for first line
+                d3.select('svg')
+                  .append('path')
+                  .datum(firstLineData) 
+                  .attr('class', 'line') 
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .attr('d', line)
+                  .style('fill', 'none')
+                  .style('stroke', '#0034F0')
+                  .style('stroke-width', '2');
+                
+                /**
+                 * Section for the second line
+                 */
+                 d3.select('svg')
+                  .append('g')
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .selectAll('circle')
+                  .data(secondLineData)
+                  .enter()
+                  .append('circle')
+                  .attr('cx', function (d) { return x(d[0])  + x.bandwidth()/2; })
+                  .attr('cy', function (d) { return y(d[1]); })
+                  .attr('r', 3)
+                  .style('fill', '#FC6000');
+
+                var line = d3.line()
+                  .x(function(d) { return x(d[0]) + x.bandwidth()/2; }) 
+                  .y(function(d) { return y(d[1]); }) 
+                  .curve(d3.curveMonotoneX);
+
+                // Draw line for second line
+                d3.select('svg')
+                  .append('path')
+                  .datum(secondLineData) 
+                  .attr('class', 'line') 
+                  .attr('transform', 'translate(' + margin + ',' + margin + ')')
+                  .attr('d', line)
+                  .style('fill', 'none')
+                  .style('stroke', '#FC6000')
+                  .style('stroke-width', '2');
+            }
+        </script>
+    </body>
+</html>
