@@ -23,7 +23,7 @@
   <body onload='init()'>
     <div id='container'>
       <div class='button-container'>
-        <p class='slide-number'>1 / 6</p>
+        <p class='slide-number'>1 / 7</p>
         <button class='next-button' onclick='nextSlide()'>Next Slide</button>
       </div>
       <svg width=1000 height=1000> 
@@ -35,25 +35,30 @@
       var chartWidth = 900;
       var axisBottomHeight = margin + chartHeight;
 
+      /**
+       * Data for chart
+       */
+      var xData = [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
+      var allDeaths = [6.1, 6.2, 6.8, 8.2, 8.9, 9.4, 10.1, 11.5, 11.9, 11.9, 11.9, 12.3, 13.2, 13.1, 13.8, 14.7, 16.3, 19.8, 21.7];
+      var opioidDeaths = [2.9, 3, 3.3, 4.1, 4.5, 4.7, 5.1, 5.9, 6.1, 6.4, 6.6, 6.8, 7.3, 7.4, 7.9, 9, 10.4, 13.3, 14.9];
+
+      var firstLineData = xData.map(function (val, idx) {
+          return [val, allDeaths[idx]];
+      });
+      var secondLineData = xData.map(function (val, idx) {
+          return [val, opioidDeaths[idx]];
+      });
+
+      var x = d3.scaleBand().domain(xData).range([0, chartWidth]);
+      var y = d3.scaleLinear().domain([1, 25]).range([chartHeight, 0]);
+
+      var line = d3.line()
+        .x(function(d) { return x(d[0]) + x.bandwidth()/2; }) 
+        .y(function(d) { return y(d[1]); }) 
+        .curve(d3.curveLinear);
+
       // Function to initialize the chart axes and load the dataset
       function init() {
-
-        /**
-         * Data setup for chart
-         */
-        var xData = [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-        var allDeaths = [6.1, 6.2, 6.8, 8.2, 8.9, 9.4, 10.1, 11.5, 11.9, 11.9, 11.9, 12.3, 13.2, 13.1, 13.8, 14.7, 16.3, 19.8, 21.7];
-        var opioidDeaths = [2.9, 3, 3.3, 4.1, 4.5, 4.7, 5.1, 5.9, 6.1, 6.4, 6.6, 6.8, 7.3, 7.4, 7.9, 9, 10.4, 13.3, 14.9];
-
-        var firstLineData = xData.map(function (val, idx) {
-            return [val, allDeaths[idx]];
-        });
-        var secondLineData = xData.map(function (val, idx) {
-            return [val, opioidDeaths[idx]];
-        });
-
-        var x = d3.scaleBand().domain(xData).range([0, chartWidth]);
-        var y = d3.scaleLinear().domain([1, 25]).range([chartHeight, 0]);
         
         /**
          * Y-Axis setup
@@ -154,9 +159,10 @@
           .data(firstLineDot)
           .enter()
           .append('circle')
+          .attr('id', 'firstBlueCircle')
           .attr('cx', function (d) { return x(d[0])  + x.bandwidth()/2; })
           .attr('cy', function (d) { return y(d[1]); })
-          .attr('r', 4)
+          .attr('r', 5)
           .style('fill', '#0034F0');
 
         var secondLineDot = [[1999, 2.9]]
@@ -167,10 +173,10 @@
           .data(secondLineDot)
           .enter()
           .append('circle')
-          .attr('id', 'firstTooltipCircle')
+          .attr('id', 'firstOrangeCircle')
           .attr('cx', function (d) { return x(d[0])  + x.bandwidth()/2; })
           .attr('cy', function (d) { return y(d[1]); })
-          .attr('r', 4)
+          .attr('r', 5)
           .style('fill', '#FC6000');
 
         /**
@@ -197,95 +203,176 @@
       }
 
       function nextSlide() {
-        var slide = document.querySelector(".slide-number");
+        var slide = document.querySelector('.slide-number');
         var currNum = parseInt(slide.textContent[0]);
+        if (currNum == 7) return;
+        slide.textContent = (currNum + 1).toString() + ' / 7';
         switch (currNum) {
           case 1:
-            firstTransition();
+            transition('first', 'second', [0, 4], "<p>From 1996 to 2001, Purdue Pharma doubled its sales force, held 40 national pain management symposia, \
+              and used aggressive marketing tactics targeting the physicians they deemed most likely to prescribe OxyContin to non-malignant pain patients. \
+              As a result, OxyContin prescriptions increased ten fold in this time period from around 600,000 to 6,000,000. All the while, Purdue marketed \
+              OxyContin as having a less than 1% chance of causing addiction.</p><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2622774/' target='_blank'>Source</a>");
             break;
           case 2:
-            secondTransition();
+            transition('second', 'third', [3, 8], "<p>In 2006, federal scientists at the National Institute on Drug Abuse (NIDA) saw recent upticks in \
+              overdose-related deaths and wrote a memo about the \"disturbing\" data including increases in teen addiction. \
+              However, further action to raise awareness from the NIDA and National Institutes of Health was tabled in favor of other issues.</p> \
+              <a href='https://www.politico.com/story/2019/08/21/federal-scientists-opioid-crisis-1673694' target='_blank'>Source</a>");
             break;
           case 3:
-            thirdTransition();
+            transition('third', 'fourth', [7, 13], "<p>In 2011 and 2012, opiod prescriptions reached an all-time high in the United States \
+              with around 250 million total opiod prescriptions and an average of 81 prescriptions per 100 people in the US. In fact, \
+              nine states averaged more than 107 prescriptions per 100 people at this time. Even worse, it was during this time of prescription saturation and high demand that \
+              Fentanyl, a far more powerful synthetic opiod, became more popular as a street drug.</p><a href='https://www.cdc.gov/drugoverdose/rxrate-maps/index.html' target='_blank'>Source</a>");
             break;
           case 4:
-            fourthTransition();
+            transition('fourth', 'fifth', [12, 16], "<p>In 2014 there were 50 thousand drug overdose deaths in the United States. \
+              A large portion of total drug overdose deaths started to shift drastically toward synthetic opioids. \
+              Synthetic opiods saw an increase in 72% in death rates whereas death rates from heroin only increased 20% at this time.</p><a href='https://www.cdc.gov/mmwr/volumes/65/wr/mm655051e1.htm' target='_blank'>Source</a>");
             break;
           case 5:
-            fifthTransition();
+            transition('fifth', 'sixth', [15, 19], "<p>From 1999 to 2017 the number of drug overdose deaths more than tripled in the US and opioid specific deaths quadrupled. \
+              Fentanyl overdose deaths increased 540% in just a three year span ending in 2016 and is responsible for a large portion of the growth in drug overdose deaths in \
+              the United States. This trend continues into present day where there are over 100,000 overdose deaths a year 68% of which are attributed to synthetic opiods like Fentanyl.</p> \
+              <a href='https://www.cdc.gov/mmwr/volumes/72/wr/mm7226a4.htm#:~:text=In%202022%2C%20provisional%20data%20indicated,(IMFs)%20(1).' target='_blank'>Source</a>");
+            break;
+          case 6:
+            finalTransition();
             break;
         }
-        console.log(slide);
-        console.log(currNum);
       }
 
-      function firstTransition() {
+      function finalTransition() {
+        d3.select('#sixthTooltip')
+          .style('visibility', 'hidden');
 
+        // ADD THE ON HOVER FUNCTIONALITY HERE for both circles
+        d3.select('#sixthBlueCircle')
+          .on('mouseover', function(){return d3.select('#sixthTooltip').style('visibility', 'visible');})
+          .on('mouseout', function(){return d3.select('#sixthTooltip').style('visibility', 'hidden');})
+
+        d3.select('#sixthOrangeCircle')
+          .on('mouseover', function(){return d3.select('#sixthTooltip').style('visibility', 'visible');})
+          .on('mouseout', function(){return d3.select('#sixthTooltip').style('visibility', 'hidden');})
       }
 
-      function lines() {
-        /**
-         * Section for the first line
-         */
-          d3.select('svg')
+      function transition(from, to, dataSlice, tooltipHtml) {
+        // close prev tooltip
+        d3.select('#' + from + 'Tooltip')
+          .style('visibility', 'hidden');
+
+        // ADD THE ON HOVER FUNCTIONALITY HERE for both circles
+        d3.select('#' + from + 'BlueCircle')
+          .on('mouseover', function(){return d3.select('#' + from + 'Tooltip').style('visibility', 'visible');})
+          .on('mouseout', function(){return d3.select('#' + from + 'Tooltip').style('visibility', 'hidden');})
+
+        d3.select('#' + from + 'OrangeCircle')
+          .on('mouseover', function(){return d3.select('#' + from + 'Tooltip').style('visibility', 'visible');})
+          .on('mouseout', function(){return d3.select('#' + from + 'Tooltip').style('visibility', 'hidden');})
+
+        // line data
+        var firstLineSubData = firstLineData.slice(dataSlice[0], dataSlice[1]);
+
+        // start plotting line section
+        var path = d3.select('svg')
+          .append('g')
+          .attr('transform', 'translate(' + margin + ',' + margin + ')')
+          .append('path')
+          .attr('d', line(firstLineSubData))
+          .style('stroke', '#0034F0')
+          .attr('stroke-width', '2')
+          .attr('fill', 'none');
+
+        var pathLength = path.node().getTotalLength();
+
+        path.attr('stroke-dasharray', pathLength + ' ' + pathLength)
+          .attr('stroke-dashoffset', pathLength)
+          .attr('stroke-dashoffset', 0);
+
+        const transitionPath = d3
+          .transition()
+          .ease(d3.easeSin)
+          .duration(2500);
+
+        path.attr('stroke-dashoffset', pathLength)
+          .attr('stroke-dasharray', pathLength)
+          .transition(transitionPath)
+          .attr('stroke-dashoffset', 0);
+
+        // line data
+        var secondLineSubData = secondLineData.slice(dataSlice[0], dataSlice[1]);
+
+        // start plotting line section
+        var path = d3.select('svg')
+          .append('g')
+          .attr('transform', 'translate(' + margin + ',' + margin + ')')
+          .append('path')
+          .attr('d', line(secondLineSubData))
+          .style('stroke', '#FC6000')
+          .attr('stroke-width', '2')
+          .attr('fill', 'none');
+
+        var pathLength = path.node().getTotalLength();
+
+        path.attr('stroke-dasharray', pathLength + ' ' + pathLength)
+          .attr('stroke-dashoffset', pathLength)
+          .attr('stroke-dashoffset', 0);
+
+        path.attr('stroke-dashoffset', pathLength)
+          .attr('stroke-dasharray', pathLength)
+          .transition(transitionPath)
+          .attr('stroke-dashoffset', 0);
+
+        console.log(firstLineSubData)
+        console.log((dataSlice[1] - dataSlice[0]) -1)
+
+        d3.select('svg')
           .append('g')
           .attr('transform', 'translate(' + margin + ',' + margin + ')')
           .selectAll('circle')
-          .data(firstLineData)
+          .data([firstLineSubData[(dataSlice[1] - dataSlice[0]) -1]])
           .enter()
           .append('circle')
           .attr('cx', function (d) { return x(d[0])  + x.bandwidth()/2; })
           .attr('cy', function (d) { return y(d[1]); })
-          .attr('r', 3)
+          .attr('id', to + 'BlueCircle')
+          .transition()
+          .delay(function(d,i){ return 2500*1; })
+          .duration(500)
+          .attr('r', 5)
           .style('fill', '#0034F0');
 
-        var line = d3.line()
-          .x(function(d) { return x(d[0]) + x.bandwidth()/2; }) 
-          .y(function(d) { return y(d[1]); }) 
-          .curve(d3.curveMonotoneX);
-
-        // Draw line for first line
         d3.select('svg')
-          .append('path')
-          .datum(firstLineData) 
-          .attr('class', 'line') 
-          .attr('transform', 'translate(' + margin + ',' + margin + ')')
-          .attr('d', line)
-          .style('fill', 'none')
-          .style('stroke', '#0034F0')
-          .style('stroke-width', '2');
-        
-        /**
-         * Section for the second line
-         */
-          d3.select('svg')
           .append('g')
           .attr('transform', 'translate(' + margin + ',' + margin + ')')
           .selectAll('circle')
-          .data(secondLineData)
+          .data([secondLineSubData[(dataSlice[1] - dataSlice[0]) - 1]])
           .enter()
           .append('circle')
           .attr('cx', function (d) { return x(d[0])  + x.bandwidth()/2; })
           .attr('cy', function (d) { return y(d[1]); })
-          .attr('r', 3)
+          .attr('id', to + 'OrangeCircle')
+          .transition()
+          .delay(function(d,i){ return 2500*1; })
+          .duration(500)
+          .attr('r', 5)
           .style('fill', '#FC6000');
-
-        var line = d3.line()
-          .x(function(d) { return x(d[0]) + x.bandwidth()/2; }) 
-          .y(function(d) { return y(d[1]); }) 
-          .curve(d3.curveMonotoneX);
-
-        // Draw line for second line
-        d3.select('svg')
-          .append('path')
-          .datum(secondLineData) 
-          .attr('class', 'line') 
-          .attr('transform', 'translate(' + margin + ',' + margin + ')')
-          .attr('d', line)
-          .style('fill', 'none')
-          .style('stroke', '#FC6000')
-          .style('stroke-width', '2');
+        
+        d3.select('#container')
+          .append('div')
+          .attr('id', to + 'Tooltip')
+          .style('position', 'absolute')
+          .style('visibility', 'visible')
+          .style('background-color', '#DBF3FA')
+          .style('border', 'solid')
+          .style('border-width', '1px')
+          .style('border-radius', '5px')
+          .style('width', '400px')
+          .style('padding', '8px')
+          .style('top', '200px')
+          .style('left', '150px')
+          .html(tooltipHtml);
       }
     </script>
   </body>
